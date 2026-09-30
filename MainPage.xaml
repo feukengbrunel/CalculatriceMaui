@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    Layouts utilisés sur cette page (6 types) :
+      Grid, VerticalStackLayout, HorizontalStackLayout, ScrollView, FlexLayout, Border
+-->
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CalculatriceMaui.MainPage"
+             BackgroundColor="{StaticResource PageBackground}"
+             Shell.NavBarIsVisible="False"
+             SizeChanged="OnPageSizeChanged">
+
+    <!-- Grid racine : répartit l'écran entre en-tête, affichage et clavier.
+         Les lignes/colonnes sont réorganisées en code-behind selon l'orientation. -->
+    <Grid x:Name="RootGrid"
+          Padding="12"
+          RowSpacing="10"
+          ColumnSpacing="12"
+          RowDefinitions="Auto,2*,3*"
+          ColumnDefinitions="*">
+
+        <!-- HorizontalStackLayout : barre d'en-tête (titre + actions de l'historique) -->
+        <HorizontalStackLayout x:Name="HeaderBar"
+                               Grid.Row="0"
+                               Spacing="8"
+                               HorizontalOptions="Fill">
+            <Label Text="Calculatrice"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource TextPrimary}"
+                   VerticalOptions="Center" />
+            <Label x:Name="HistoryCountLabel"
+                   Text="· historique vide"
+                   FontSize="13"
+                   TextColor="{StaticResource TextSecondary}"
+                   VerticalOptions="Center" />
+            <Button x:Name="ClearHistoryButton"
+                    Text="Vider"
+                    Style="{StaticResource HeaderButton}"
+                    Clicked="OnClearHistoryClicked"
+                    IsVisible="False" />
+        </HorizontalStackLayout>
+
+        <!-- Border : carte arrondie qui encadre toute la zone d'affichage -->
+        <Border x:Name="DisplayCard"
+                Grid.Row="1"
+                Style="{StaticResource DisplayCard}">
+
+            <Grid RowDefinitions="*,Auto,Auto" RowSpacing="4">
+
+                <!-- ScrollView : l'historique peut dépasser la hauteur disponible -->
+                <ScrollView x:Name="HistoryScroll" Grid.Row="0">
+                    <!-- VerticalStackLayout : empile les lignes d'historique -->
+                    <VerticalStackLayout x:Name="HistoryList"
+                                         Spacing="6"
+                                         VerticalOptions="End" />
+                </ScrollView>
+
+                <!-- Opération en cours, affichée au-dessus du résultat -->
+                <Label x:Name="ExpressionLabel"
+                       Grid.Row="1"
+                       Text=" "
+                       FontSize="20"
+                       TextColor="{StaticResource TextSecondary}"
+                       HorizontalTextAlignment="End"
+                       LineBreakMode="HeadTruncation"
+                       MaxLines="1" />
+
+                <Label x:Name="ResultLabel"
+                       Grid.Row="2"
+                       Text="0"
+                       FontSize="56"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource TextPrimary}"
+                       HorizontalTextAlignment="End"
+                       LineBreakMode="NoWrap"
+                       MaxLines="1"
+                       SemanticProperties.Description="Résultat" />
+            </Grid>
+        </Border>
+
+        <!-- Grid : clavier en 4 colonnes égales ; toutes les lignes sont en étoile
+             pour que les touches se partagent l'espace sans jamais déborder. -->
+        <Grid x:Name="Keypad"
+              Grid.Row="2"
+              RowSpacing="8"
+              ColumnSpacing="8"
+              RowDefinitions="*,*,*,*,*,*"
+              ColumnDefinitions="*,*,*,*"
+              SizeChanged="OnKeypadSizeChanged">
+
+            <!-- FlexLayout : rangée de fonctions avancées, largeur répartie automatiquement -->
+            <FlexLayout x:Name="FunctionRow"
+                        Grid.Row="0"
+                        Grid.ColumnSpan="4"
+                        Direction="Row"
+                        Wrap="NoWrap"
+                        AlignItems="Stretch"
+                        JustifyContent="SpaceBetween">
+                <Button Text="√x"  Style="{StaticResource FlexFunctionKey}" Clicked="OnSquareRootClicked" SemanticProperties.Description="Racine carrée" />
+                <Button Text="x²"  Style="{StaticResource FlexFunctionKey}" Clicked="OnSquareClicked" SemanticProperties.Description="Carré" />
+                <Button Text="1/x" Style="{StaticResource FlexFunctionKey}" Clicked="OnReciprocalClicked" SemanticProperties.Description="Inverse" />
+                <Button Text="⌫"   Style="{StaticResource FlexFunctionKey}" Clicked="OnBackspaceClicked" SemanticProperties.Description="Effacer le dernier caractère" />
+            </FlexLayout>
+
+            <Button Grid.Row="1" Grid.Column="0" Text="AC" Style="{StaticResource ClearKey}"    Clicked="OnClearClicked" SemanticProperties.Description="Remise à zéro" />
+            <Button Grid.Row="1" Grid.Column="1" Text="±"  Style="{StaticResource FunctionKey}" Clicked="OnToggleSignClicked" SemanticProperties.Description="Changer de signe" />
+            <Button Grid.Row="1" Grid.Column="2" Text="%"  Style="{StaticResource FunctionKey}" Clicked="OnPercentClicked" SemanticProperties.Description="Pourcentage" />
+            <Button Grid.Row="1" Grid.Column="3" Text="÷"  Style="{StaticResource OperatorKey}" Clicked="OnOperatorClicked" SemanticProperties.Description="Diviser" />
+
+            <Button Grid.Row="2" Grid.Column="0" Text="7" Style="{StaticResource DigitKey}" Clicked="OnDigitClicked" />
+            <Button Grid.Row="2" Grid.Column="1" Text="8" Style="{StaticResource DigitKey}" Clicked="OnDigitClicked" />
+            <Button Grid.Row="2" Grid.Column="2" Text="9" Style="{StaticResource DigitKey}" Clicked="OnDigitClicked" />
+            <Button Grid.Row="2" Grid.Column="3" Text="×" Style="{StaticResource OperatorKey}" Clicked="OnOperatorClicked" SemanticProperties.Description="Multiplier" />
+
+            <Button Grid.Row="3" Grid.Column="0" Text="4" Style="{StaticResource DigitKey}" Clicked="OnDigitClicked" />
+            <Button Grid.Row="3" Grid.Column="1" Text="5" Style="{StaticResource DigitKey}" Clicked="OnDigitClicked" />
+            <Button Grid.Row="3" Grid.Column="2" Text="6" Style="{StaticResource DigitKey}" Clicked="OnDigitClicked" />
+            <Button Grid.Row="3" Grid.Column="3" Text="−" Style="{StaticResource OperatorKey}" Clicked="OnOperatorClicked" SemanticProperties.Description="Soustraire" />
+
+            <Button Grid.Row="4" Grid.Column="0" Text="1" Style="{StaticResource DigitKey}" Clicked="OnDigitClicked" />
+            <Button Grid.Row="4" Grid.Column="1" Text="2" Style="{StaticResource DigitKey}" Clicked="OnDigitClicked" />
+            <Button Grid.Row="4" Grid.Column="2" Text="3" Style="{StaticResource DigitKey}" Clicked="OnDigitClicked" />
+            <Button Grid.Row="4" Grid.Column="3" Text="+" Style="{StaticResource OperatorKey}" Clicked="OnOperatorClicked" SemanticProperties.Description="Additionner" />
+
+            <Button Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Text="0" Style="{StaticResource DigitKey}" Clicked="OnDigitClicked" />
+            <Button Grid.Row="5" Grid.Column="2" Text="," Style="{StaticResource DigitKey}"  Clicked="OnDecimalClicked" SemanticProperties.Description="Virgule" />
+            <Button Grid.Row="5" Grid.Column="3" Text="=" Style="{StaticResource EqualsKey}" Clicked="OnEqualsClicked" SemanticProperties.Description="Égal" />
+        </Grid>
+    </Grid>
+</ContentPage>
